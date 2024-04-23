@@ -1,0 +1,14 @@
+*.o
+y.tab.*
+Makefile
+config.cmd
+config.h
+config.log
+config.mak
+config.md
+config.sed
+config.sub
+cwatch
+cwatch.1
+cwatch.h
+lex.yy.c
