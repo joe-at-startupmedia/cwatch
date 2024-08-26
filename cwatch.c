@@ -1,5 +1,5 @@
 /*
- *   Copyright (c) 2002-2017 David Parsons. All rights reserved.
+ *   Copyright (c) 2002-2024 Jessica L. Parsons. All rights reserved.
  *   
  *   Redistribution and use in source and binary forms, with or without
  *   modification, are permitted provided that the following conditions
@@ -13,7 +13,7 @@
  *  3. All advertising materials mentioning features or use of this
  *     software must display the following acknowledgement:
  *     
- *   This product includes software developed by David Parsons
+ *   This product includes software developed by Jessica L. Parsons
  *   (orc@pell.portland.or.us)
  *     
  *  THIS SOFTWARE IS PROVIDED BY DAVID PARSONS ``AS IS'' AND ANY
