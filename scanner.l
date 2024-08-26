@@ -32,6 +32,7 @@
  */
 #include <stdio.h>
 #include "y.tab.h"
+#include "prototypes.h"
 
 int line_number = 1;
 

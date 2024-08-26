@@ -38,6 +38,11 @@
 #   include <malloc.h>
 #endif
 
+#include "prototypes.h"
+
+extern int yylex();
+extern void yyerror(char*);
+
 %}
 
 %union {

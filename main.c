@@ -49,6 +49,7 @@
 #include <unistd.h>
 #include <signal.h>
 #include <errno.h>
+#include <ctype.h>
 
 #include "config.h"
 #include "cwatch.h"
@@ -59,6 +60,20 @@
 #else
 #   include "basis/options.h"
 #endif
+
+extern struct pattern * compile();
+
+/* debugging hooks */
+extern char *cmdname(int token);
+extern void dump(struct pattern *p);
+extern void describe(struct command *c);
+
+
+/* lex/yacc prototypes */
+extern int openinput(char *);
+extern int defaultinput(char *s);
+
+#define if(x)	if((x))
 
 
 int tflag = 0;
@@ -294,13 +309,13 @@ pipeline(char *src, int size, struct command *cmd, int argc, int argv[])
 } /* pipeline */
 
 
-typedef (*echofn)(char*,int,struct command *, FILE*);
+typedef void (*echofn)(char*,int,struct command *, FILE*);
 
 /*
  * echoun() spits out a throttle message for a throttle that's just
  *          expired.
  */
-static
+static void
 echoun(char *line, int size, struct command *q, FILE *out)
 {
     struct pattern *p = q->root;
@@ -329,7 +344,7 @@ echoun(char *line, int size, struct command *q, FILE *out)
 /*
  * echoit() echo a matched line, putting appropriate throttle prefixes in.
  */
-static
+static void
 echoit(char *line, int size, struct command *q, FILE *out)
 {
     fwrite(line, size, 1, out);
@@ -354,7 +369,7 @@ notnow(struct command *q, struct tm *now)
 /*
  * mailto() sends mail to people
  */
-static
+static void
 mailto(char *s, int size, struct command *q, int ac, int av[], echofn echo)
 {
     FILE *f;
@@ -377,7 +392,7 @@ mailto(char *s, int size, struct command *q, int ac, int av[], echofn echo)
 /*
  * writeto() write(1)'s people
  */
-static
+static void
 writeto(char *s, int size, struct command *q, int ac, int av[], echofn echo)
 {
     char **recipients = q->c.mail.addr;
@@ -563,36 +578,38 @@ setalarm()
 void
 restart_alarm()
 {
-    if (rplus)
-	if (rflag) {
-	    /* at absolute time ... */
-	    time_t now = time(0);
-	    int hr, min;
-	    int delay;
-	    struct tm *t;
+    if (!rplus)
+	return;
 
-	    t = localtime(&now);
-	    hr = rplus / 60;
-	    min = rplus % 60;
+    if (rflag) {
+	/* at absolute time ... */
+	time_t now = time(0);
+	int hr, min;
+	int delay;
+	struct tm *t;
 
-	    /* hours delay */
-	    delay =  60 * ((t->tm_hour - hr) + ((hr > t->tm_hour) ? 24 : 0));
-	    /* plus minutes delay */
-	    delay += (t->tm_min - min) + ((min > t->tm_min) ? 60 : 0);
+	t = localtime(&now);
+	hr = rplus / 60;
+	min = rplus % 60;
 
-	    alarm(60*delay);
-	}
-	else {
-	    /* .. or after some interval */
-	    alarm(60*rplus);
-	}
+	/* hours delay */
+	delay =  60 * ((t->tm_hour - hr) + ((hr > t->tm_hour) ? 24 : 0));
+	/* plus minutes delay */
+	delay += (t->tm_min - min) + ((min > t->tm_min) ? 60 : 0);
+
+	alarm(60*delay);
+    }
+    else {
+	/* .. or after some interval */
+	alarm(60*rplus);
+    }
 } /* restart_alarm */
 
 
 /*
  * scan() a FILE* for patterns
  */
-static
+static void
 scan(FILE *file, struct pattern *p)
 {
     struct pattern *q;
@@ -623,7 +640,7 @@ scan(FILE *file, struct pattern *p)
 /*
  * dopipe() runs a command and looks at the output from it
  */
-static
+static void
 dopipe(struct pattern *p)
 {
     FILE *file;
@@ -641,7 +658,7 @@ dopipe(struct pattern *p)
  * dotail() tails a command (via rebuilding input as ``tail -f $input''
  *          and calling dopipe.)
  */
-static
+static void
 dotail(struct pattern *p)
 {
     char *cmd;
@@ -662,7 +679,7 @@ dotail(struct pattern *p)
 /*
  * dofile() looks through an already existing file.
  */
-static
+static void
 dofile(struct pattern *p)
 {
     FILE *file;
@@ -684,6 +701,7 @@ dofile(struct pattern *p)
  */
 int errors = 0;
 
+void
 yyerror(char *s)
 {
     extern int line_number;
@@ -880,7 +898,7 @@ main(int argc, char **argv)
 	 * file.  If that fails use a compiled-in default
 	 */
 	if (!openinput(cfgfile))
-	    defaultinput("watchfor /.*/ echo");
+	    (void)defaultinput("watchfor /.*/ echo");
     }
     else if ( !openinput(cfgfile) ) {
 	fprintf(stderr, "%s: no such file %s\n", pgm, cfgfile);

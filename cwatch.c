@@ -36,6 +36,8 @@
 #include <string.h>
 #include <pwd.h>
 #include <sys/types.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 #include "cwatch.h"
 #include "debug.h"
@@ -51,6 +53,7 @@ static struct pattern *pat = 0;
 extern char *pgm;
 
 
+void
 statement(int what)
 {
     struct pattern *p = calloc(1, sizeof *p);
@@ -109,6 +112,7 @@ mailcmd(char *pgm, struct command *p)
 }
 
 
+void
 action(int order)
 {
     struct command *p = calloc(1, sizeof *p);
@@ -143,6 +147,7 @@ action(int order)
 }
 
 
+int
 re(char *pat)
 {
     char *whine;
@@ -158,36 +163,42 @@ re(char *pat)
 }
 
 
+void
 attrib(int attrib)
 {
     tmp.c.echo.attrib = attrib;
 }
 
 
+void
 fg(int color)
 {
     tmp.c.echo.fg = color;
 }
 
 
+void
 bg(int color)
 {
     tmp.c.echo.bg = color;
 }
 
 
+void
 nrbell(int num)
 {
     tmp.c.echo.count = num;
 }
 
 
+void
 keep_open()
 {
     tmp.c.exec.keepopen = 1;
 }
 
 
+void
 address(char *mailto)
 {
     if (tmp.c.mail.addr == 0)
@@ -200,31 +211,35 @@ address(char *mailto)
 }
 
 
+void
 delay(int hr, int min, int sec)
 {
     tmp.c.throttle.delay = (hr * 3600) + (min * 60) + sec;
 }
 
 
+void
 use(int flag)
 {
     tmp.c.throttle.use = flag;
 }
 
 
+void
 subject(char *pat)
 {
     tmp.c.mail.subject = strdup(pat);
 }
 
 
+void
 cmdline(char *command)
 {
     tmp.c.exec.cmd = strdup(command);
 }
 
-static
-mask(unsigned *flags, char *name, unsigned first, unsigned last, unsigned max)
+static int
+mask(int *flags, char *name, unsigned first, unsigned last, unsigned max)
 {
 #if DEBUG
     printf("mask(%d,\"%s\",%d,%d,%d)\n", *flags, name, first, last, max);
@@ -238,7 +253,7 @@ mask(unsigned *flags, char *name, unsigned first, unsigned last, unsigned max)
 	return 1;
     }
     else if (last > max || last < first) {
-	fprintf(stderr, "bad % range %d-%d\n", name, first, last);
+	fprintf(stderr, "bad %s range %d-%d\n", name, first, last);
 	return 0;
     }
     while (first <= last) {
@@ -248,11 +263,13 @@ mask(unsigned *flags, char *name, unsigned first, unsigned last, unsigned max)
     return 1;
 }
 
+int
 day(unsigned int first, unsigned int last)
 {
     return mask(&tmp.day, "day", first, last, 7);
 }
 
+int
 hour(unsigned int first, unsigned int last)
 {
     return mask(&tmp.hour, "hour", first, last, 24);
@@ -262,6 +279,8 @@ hour(unsigned int first, unsigned int last)
 struct pattern *
 compile()
 {
+    extern int yyparse(void);
+    
     yyparse();
     return pat;
 }
