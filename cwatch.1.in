@@ -57,8 +57,8 @@ attempts to open
 .IR $HOME /.cwatchrc
 and if that fails, it uses the builtin configuration of
 .nf
-watchfor /.*/
-    echo
+    watchfor /.*/
+	echo
 .fi
 .TP
 .B \--help
@@ -160,11 +160,11 @@ only accepts a single pattern regex per pattern, so common
 .B swatch
 expressions like
 .nf
-ignore /foo/,/bar/,/fu/
+	ignore /foo/,/bar/,/fu/
 .fi
-are isallowed;  you need to rewrite them as
+are disallowed;  you need to rewrite them as
 .nf
-ignore /foo|bar|fu/
+	ignore /foo|bar|fu/
 .fi
 
 .B watchfor
