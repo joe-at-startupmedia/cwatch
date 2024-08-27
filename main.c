@@ -585,31 +585,29 @@ setalarm()
 void
 restart_alarm()
 {
-    if (!rplus)
-        return;
+    if (rplus)
+        if (rflag) {
+            /* at absolute time ... */
+            time_t now = time(0);
+            int hr, min;
+            int delay;
+            struct tm *t;
 
-    if (rflag) {
-        /* at absolute time ... */
-        time_t now = time(0);
-        int hr, min;
-        int delay;
-        struct tm *t;
+            t = localtime(&now);
+            hr = rplus / 60;
+            min = rplus % 60;
 
-        t = localtime(&now);
-        hr = rplus / 60;
-        min = rplus % 60;
+            /* hours delay */
+            delay =  60 * ((t->tm_hour - hr) + ((hr > t->tm_hour) ? 24 : 0));
+            /* plus minutes delay */
+            delay += (t->tm_min - min) + ((min > t->tm_min) ? 60 : 0);
 
-        /* hours delay */
-        delay =  60 * ((t->tm_hour - hr) + ((hr > t->tm_hour) ? 24 : 0));
-        /* plus minutes delay */
-        delay += (t->tm_min - min) + ((min > t->tm_min) ? 60 : 0);
-
-        alarm(60*delay);
-    }
-    else {
-        /* .. or after some interval */
-        alarm(60*rplus);
-    }
+            alarm(60*delay);
+        }
+        else {
+            /* .. or after some interval */
+            alarm(60*rplus);
+        }
 } /* restart_alarm */
 
 
