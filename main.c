@@ -222,17 +222,24 @@ expand(char *src, int ssiz, char *cmd, int argc, int argv[])
                         cpy = argv[0];
                         add = argv[1]-cpy;
                         break;
-            default:        arg = 2 * ((*p)-'0');
+            default:    arg = 2 * ((*p)-'0');
                         cpy = argv[arg];
                         add = argv[arg+1]-cpy;
                         break;
             }
+
             if (di + add >= size-2) {
                 size += add;
                 dest = realloc(dest, size *= 2);
             }
-            for (; add > 0; --add)
-                dest[di++] = src[cpy++];
+            for (; add > 0; --add) {
+                char replace = src[cpy++];
+                if (replace == '`' || replace == '\'') {
+                  dest[di++] = '"';
+                } else {
+                  dest[di++] = replace;
+                }
+            }
         }
         else {
             if (di >= size-2)
